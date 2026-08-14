@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${accion} + ' — Portal Académico'">Resultado</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: #f4f1eb;
+            color: #2c2c2c;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: #8b0000;
+            color: #fff;
+            font-size: 0.78rem;
+            padding: 0.35rem 2rem;
+            letter-spacing: 0.02em;
+        }
+
+        header {
+            background: #fff;
+            border-bottom: 3px solid #8b0000;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        .logo-circle {
+            width: 56px; height: 56px;
+            background: #8b0000;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.4rem; flex-shrink: 0;
+        }
+        .brand h1 { font-size: 1.25rem; font-weight: normal; color: #8b0000; }
+        .brand span { font-size: 0.78rem; color: #666; font-family: Arial, sans-serif; }
+
+        nav { background: #2c2c2c; padding: 0 2rem; }
+        nav ul { list-style: none; display: flex; }
+        nav ul li a {
+            display: block; color: #ccc; text-decoration: none;
+            font-family: Arial, sans-serif; font-size: 0.82rem;
+            padding: 0.65rem 1rem;
+            transition: background 0.15s;
+        }
+        nav ul li a:hover { background: #8b0000; color: #fff; }
+
+        main {
+            max-width: 860px;
+            margin: 2rem auto;
+            padding: 0 2rem 3rem;
+        }
+
+        .breadcrumb {
+            font-family: Arial, sans-serif;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 1.2rem;
+        }
+        .breadcrumb a { color: #8b0000; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: normal;
+            color: #2c2c2c;
+            border-bottom: 1px solid #d5c9b5;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            font-family: Arial, sans-serif;
+            font-size: 0.72rem;
+            font-weight: bold;
+            padding: 0.2rem 0.7rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.04em;
+        }
+        .badge-ok  { background: #e6f4ee; color: #256336; border: 1px solid #256336; }
+        .badge-err { background: #fdecea; color: #8b0000; border: 1px solid #8b0000; }
+
+        .descripcion {
+            background: #fffdf7;
+            border-left: 3px solid #8b0000;
+            padding: 0.8rem 1rem;
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 1.2rem;
+        }
+
+        .resultado-box {
+            background: #fff;
+            border: 1px solid #d5c9b5;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        .resultado-box label {
+            display: block;
+            font-family: Arial, sans-serif;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin-bottom: 0.6rem;
+        }
+        .resultado-box pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            color: #2c2c2c;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+
+        .nota-consola {
+            background: #f8f6f2;
+            border: 1px solid #d5c9b5;
+            padding: 0.8rem 1rem;
+            font-family: Arial, sans-serif;
+            font-size: 0.78rem;
+            color: #555;
+            margin-bottom: 1.2rem;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            background: #8b0000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .btn-back:hover { background: #6e0000; }
+
+        footer {
+            background: #2c2c2c;
+            color: #888;
+            font-family: Arial, sans-serif;
+            font-size: 0.72rem;
+            text-align: center;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        Instituto Tecnológico Superior &nbsp;|&nbsp; Departamento de Sistemas Computacionales
+    </div>
+
+    <header>
+        <div class="logo-circle">ITS</div>
+        <div class="brand">
+            <h1>Portal de Servicios Académicos</h1>
+            <span>Demostración — Arquitectura de Microservicios con OAuth2</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="#">Entity-A</a></li>
+            <li><a href="#">Entity-B</a></li>
+            <li><a href="#">Documentación</a></li>
+        </ul>
+    </nav>
+
+    <main>
+
+        <div class="breadcrumb">
+            <a href="/">Inicio</a> &nbsp;/&nbsp; <span th:text="${accion}">Trámite</span>
+        </div>
+
+        <h2 th:text="${accion}">Resultado del trámite</h2>
+
+        <div th:if="${exito}" class="badge badge-ok">TRÁMITE COMPLETADO</div>
+        <div th:unless="${exito}" class="badge badge-err">RECHAZADO / ACCESO DENEGADO</div>
+
+        <div class="descripcion" th:text="${descripcion}">
+            La operación solicitada ha concluido.
+        </div>
+
+        <div class="resultado-box">
+            <label>Respuesta obtenida</label>
+            <pre th:text="${resultado}">Resultado de la operación</pre>
+        </div>
+
+        <div class="nota-consola">
+            <strong>Atención:</strong>
+            Para propósitos de esta demostración técnica, toda la estructura de datos 
+            (JSON), el token JWT y los encabezados HTTP enviados al API Gateway no se 
+            despliegan en esta pantalla gráfica.
+            <br/><br/>
+            Por favor, <strong>revise la consola del servidor (terminal de ms-frontend)</strong> 
+            para auditar el flujo completo de OAuth2 y ver los datos en crudo que 
+            retornaron los microservicios.
+        </div>
+
+        <a href="/" class="btn-back">← Regresar al portal principal</a>
+
+    </main>
+
+    <footer>
+        &copy; 2026 Instituto Tecnológico Superior &nbsp;|&nbsp;
+        Materia: Desarrollo de Aplicaciones en Microservicios &nbsp;|&nbsp;
+        Proyecto integrador
+    </footer>
+
+</body>
+</html>

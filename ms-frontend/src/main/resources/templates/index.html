@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Portal Académico — Demo Microservicios</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: #f4f1eb;
+            color: #2c2c2c;
+            min-height: 100vh;
+        }
+
+        /* ── Barra superior ── */
+        .topbar {
+            background: #8b0000;
+            color: #fff;
+            font-size: 0.78rem;
+            padding: 0.35rem 2rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Encabezado ── */
+        header {
+            background: #fff;
+            border-bottom: 3px solid #8b0000;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        .logo-circle {
+            width: 56px;
+            height: 56px;
+            background: #8b0000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .brand h1 {
+            font-size: 1.25rem;
+            font-weight: normal;
+            color: #8b0000;
+            letter-spacing: 0.01em;
+        }
+        .brand span {
+            font-size: 0.78rem;
+            color: #666;
+            font-family: Arial, sans-serif;
+        }
+
+        /* ── Navegación ── */
+        nav {
+            background: #2c2c2c;
+            padding: 0 2rem;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+        }
+        nav ul li a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            padding: 0.65rem 1rem;
+            transition: background 0.15s, color 0.15s;
+        }
+        nav ul li a:hover,
+        nav ul li a.activo {
+            background: #8b0000;
+            color: #fff;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(to bottom, #fff, #eee8dc);
+            border-bottom: 1px solid #d5c9b5;
+            padding: 2.5rem 2rem 2rem;
+            text-align: center;
+        }
+        .hero h2 {
+            font-size: 1.6rem;
+            font-weight: normal;
+            color: #2c2c2c;
+            margin-bottom: 0.4rem;
+        }
+        .hero h2 span { color: #8b0000; }
+        .hero p {
+            font-family: Arial, sans-serif;
+            font-size: 0.88rem;
+            color: #666;
+            max-width: 520px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ── Diagrama ── */
+        .diagrama {
+            background: #fff;
+            border: 1px solid #d5c9b5;
+            border-left: 4px solid #8b0000;
+            margin: 1.5rem 2rem;
+            padding: 1rem 1.2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.78rem;
+            color: #444;
+            line-height: 2;
+        }
+        .diagrama .sv { color: #8b0000; font-weight: bold; }
+        .diagrama .pt { color: #444; }
+
+        /* ── Contenido principal ── */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        .section-title {
+            font-size: 0.72rem;
+            font-family: Arial, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #8b0000;
+            border-bottom: 1px solid #d5c9b5;
+            padding-bottom: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ── Tarjetas de acción ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #d5c9b5;
+            padding: 1.2rem;
+        }
+        .card-label {
+            font-family: Arial, sans-serif;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin-bottom: 0.3rem;
+        }
+        .card h3 {
+            font-size: 0.95rem;
+            font-weight: normal;
+            color: #2c2c2c;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            font-family: Arial, sans-serif;
+            font-size: 0.78rem;
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.55;
+        }
+
+        /* ── Botones ── */
+        form { display: contents; }
+
+        .btn {
+            width: 100%;
+            padding: 0.55rem 1rem;
+            font-family: Arial, sans-serif;
+            font-size: 0.82rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: background 0.15s;
+        }
+        .btn-primary { background: #8b0000; color: #fff; }
+        .btn-primary:hover { background: #6e0000; }
+
+        .btn-secondary { background: #2c2c2c; color: #fff; }
+        .btn-secondary:hover { background: #111; }
+
+        .btn-outline {
+            background: #fff;
+            color: #2c2c2c;
+            border: 1.5px solid #2c2c2c;
+        }
+        .btn-outline:hover { background: #f0ece4; }
+
+        .btn-danger { background: #5c1010; color: #fff; }
+        .btn-danger:hover { background: #3d0b0b; }
+
+        /* ── Nota ── */
+        .nota {
+            background: #fffdf7;
+            border: 1px solid #d5c9b5;
+            border-left: 3px solid #8b0000;
+            padding: 0.8rem 1rem;
+            font-family: Arial, sans-serif;
+            font-size: 0.78rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* ── Footer ── */
+        footer {
+            background: #2c2c2c;
+            color: #888;
+            font-family: Arial, sans-serif;
+            font-size: 0.72rem;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        Instituto Tecnológico Superior &nbsp;|&nbsp; Departamento de Sistemas Computacionales
+    </div>
+
+    <header>
+        <div class="logo-circle">ITS</div>
+        <div class="brand">
+            <h1>Portal de Servicios Académicos</h1>
+            <span>Demostración — Arquitectura de Microservicios con OAuth2</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/" class="activo">Inicio</a></li>
+            <li><a href="#">Entity-A</a></li>
+            <li><a href="#">Entity-B</a></li>
+            <li><a href="#">Documentación</a></li>
+        </ul>
+    </nav>
+
+    <div class="hero">
+        <h2>Bienvenido al <span>Portal de Servicios</span></h2>
+        <p>
+            Selecciona el sistema al que deseas ingresar. Todas las peticiones son 
+            validadas internamente y los detalles de conexión se registran en la 
+            bitácora del servidor.
+        </p>
+    </div>
+
+    <main>
+        <p class="section-title">Trámites y Consultas</p>
+
+        <div class="grid">
+
+            <div class="card">
+                <div class="card-label">Acceso al sistema</div>
+                <h3>Autenticación institucional</h3>
+                <p>
+                    Inicia sesión de manera segura para obtener tus credenciales 
+                    de acceso a los diferentes módulos de la universidad.
+                </p>
+                <form method="post" action="/login">
+                    <button id="btn-login" type="submit" class="btn btn-primary">
+                        Iniciar sesión
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-label">Módulo A</div>
+                <h3>Consultar alumnos inscritos</h3>
+                <p>
+                    Accede al registro general de estudiantes del período actual. 
+                    Requiere haber iniciado sesión previamente.
+                </p>
+                <form method="post" action="/ver-entity-a">
+                    <button id="btn-entity-a" type="submit" class="btn btn-secondary">
+                        Consultar Alumnos
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-label">Módulo B</div>
+                <h3>Consultar carga académica</h3>
+                <p>
+                    Revisa las materias y horarios registrados en el sistema 
+                    central. Requiere credenciales vigentes.
+                </p>
+                <form method="post" action="/ver-entity-b">
+                    <button id="btn-entity-b" type="submit" class="btn btn-outline">
+                        Consultar Carga
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-label">Seguridad</div>
+                <h3>Simular acceso denegado</h3>
+                <p>
+                    Verifica que los sistemas bloquean correctamente el acceso 
+                    cuando se intenta ingresar sin credenciales válidas.
+                </p>
+                <form method="post" action="/demo-401">
+                    <button id="btn-demo-401" type="submit" class="btn btn-danger">
+                        Prueba de seguridad
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="nota">
+            <strong>Indicación para el profesor:</strong>
+            La información técnica del flujo OAuth2 (el token JWT, las peticiones HTTP y 
+            respuestas de los microservicios) no se muestra en esta pantalla. 
+            <strong>Por favor, revise la consola (terminal) de la aplicación Spring Boot</strong> 
+            para ver el registro detallado en tiempo real al hacer clic en los botones.
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 Instituto Tecnológico Superior &nbsp;|&nbsp;
+        Materia: Desarrollo de Aplicaciones en Microservicios &nbsp;|&nbsp;
+        Proyecto integrador
+    </footer>
+
+</body>
+</html>

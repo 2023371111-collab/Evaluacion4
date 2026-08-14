@@ -1,0 +1,9 @@
+.git
+.idea
+.vscode
+**/.gradle
+**/build
+**/target
+evidencias
+docs
+

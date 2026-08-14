@@ -1,0 +1,42 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:9000/oauth2/jwks}
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: ms-a
+            uri: lb://ms-damian
+            predicates:
+              - Path=/api/entity-a/**
+          - id: ms-b
+            uri: lb://microserviciob
+            predicates:
+              - Path=/api/entity-b/**
+
+eureka:
+  client:
+    registry-fetch-interval-seconds: 5
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    instance-id: ${spring.application.name}:${HOSTNAME:${random.value}}
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      probes:
+        enabled: true

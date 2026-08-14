@@ -1,0 +1,8 @@
+.env
+.idea/
+.vscode/
+**/.gradle/
+**/build/
+**/target/
+evidencias/runtime/
+

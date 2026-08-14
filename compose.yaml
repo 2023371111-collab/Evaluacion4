@@ -1,0 +1,162 @@
+name: proyecto-microservicios-ab
+
+x-app-defaults: &app-defaults
+  restart: unless-stopped
+  networks:
+    - microservices-net
+
+x-health-defaults: &health-defaults
+  interval: 10s
+  timeout: 5s
+  retries: 25
+  start_period: 35s
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: microservices
+      POSTGRES_USER: platform
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ProyectoDocker2026}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U platform -d microservices"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    networks:
+      - microservices-net
+
+  eureka:
+    <<: *app-defaults
+    build:
+      context: ./eureka
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms96m -Xmx384m
+      SERVER_PORT: 8761
+    ports:
+      - "8761:8761"
+    healthcheck:
+      <<: *health-defaults
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health | grep -q 'UP'"]
+
+  microservicio-a:
+    <<: *app-defaults
+    build:
+      context: ./microservicio-a
+    deploy:
+      replicas: 2
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms64m -Xmx256m
+      SERVER_PORT: 8080
+      EUREKA_URL: http://eureka:8761/eureka/
+      DB_URL: jdbc:postgresql://postgres:5432/microservices?currentSchema=msa
+      DB_USER: platform
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ProyectoDocker2026}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      <<: *health-defaults
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q 'UP'"]
+
+  microservicio-b:
+    <<: *app-defaults
+    build:
+      context: ./microservicio-b
+    deploy:
+      replicas: 2
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms64m -Xmx256m
+      SERVER_PORT: 8080
+      EUREKA_URL: http://eureka:8761/eureka/
+      DB_URL: jdbc:postgresql://postgres:5432/microservices?currentSchema=msb
+      DB_USER: platform
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ProyectoDocker2026}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      microservicio-a:
+        condition: service_healthy
+    healthcheck:
+      <<: *health-defaults
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q 'UP'"]
+
+  ms-auth:
+    <<: *app-defaults
+    build:
+      context: ./ms-auth
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms64m -Xmx256m
+      SERVER_PORT: 9000
+      AUTH_ISSUER_URI: http://localhost:9000
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID:-frontend-client}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET:-secret123}
+    ports:
+      - "9000:9000"
+    healthcheck:
+      <<: *health-defaults
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/actuator/health | grep -q 'UP'"]
+
+  api-gateway:
+    <<: *app-defaults
+    build:
+      context: ./api-gateway
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms64m -Xmx256m
+      SERVER_PORT: 8080
+      EUREKA_URL: http://eureka:8761/eureka/
+      JWT_JWK_SET_URI: http://ms-auth:9000/oauth2/jwks
+    ports:
+      - "8080:8080"
+    depends_on:
+      eureka:
+        condition: service_healthy
+      ms-auth:
+        condition: service_healthy
+      microservicio-a:
+        condition: service_healthy
+      microservicio-b:
+        condition: service_healthy
+    healthcheck:
+      <<: *health-defaults
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q 'UP'"]
+
+  ms-frontend:
+    <<: *app-defaults
+    build:
+      context: ./ms-frontend
+    environment:
+      JAVA_TOOL_OPTIONS: -Xms64m -Xmx256m
+      SERVER_PORT: 8083
+      AUTH_TOKEN_URL: http://ms-auth:9000/oauth2/token
+      GATEWAY_BASE_URL: http://api-gateway:8080
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID:-frontend-client}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET:-secret123}
+    ports:
+      - "8083:8083"
+    depends_on:
+      ms-auth:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      <<: *health-defaults
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/ | grep -q 'Portal de Servicios'"]
+
+volumes:
+  postgres-data:
+
+networks:
+  microservices-net:
+    driver: bridge
+
